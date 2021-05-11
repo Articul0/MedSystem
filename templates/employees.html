@@ -6,8 +6,8 @@
 
 {% block body %}
 <div class="container mt-5">
+    <p align="right">Вы вошли как: {{ user }}</p>
     <h1>Список работников</h1>
-
     {% if employees|length > 0 %}
         {% for employee in employees %}
         <div class="alert alert-info">

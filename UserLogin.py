@@ -1,6 +1,6 @@
 class UserLogin():
     def fromDB(self, user_id, db):
-        self.__user = db.query.get(user_id)
+        self.__user = db.query.get(int(user_id))
 
     def create(self, user):
         self.__user = user

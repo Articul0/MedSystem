@@ -2,3 +2,5 @@ venv/
 .idea/
 database.db
 __pycache__/
+data.csv
+data.xlsx

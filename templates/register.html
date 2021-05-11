@@ -6,6 +6,13 @@
 
 {% block body %}
 <div class="container mt-5">
-    <h1>Регистрация</h1>
+    <p align="right">Вы вошли как: {{ user }}</p>
+    <h1>Зарегестрировать пользователя</h1>
+    <form method="post">
+        <input type="text" name="email" id="email" class="form-control" placeholder="e-mail"><br>
+        <input type="text" name="password" id="password" class="form-control" placeholder="Пароль"><br>
+        <input type="text" name="role" id="role" class="form-control" placeholder="Должность"><br>
+        <input type="submit" class="btn btn-success" value="Зарегистрировать">
+    </form>
 </div>
 {% endblock %}
