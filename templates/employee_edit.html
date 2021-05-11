@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ employee.name }}
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1>Редактирование {{ employee.name }}</h1>
+    <form method="post">
+        <input type="text" name="name" id="name" class="form-control" value="{{ employee.name }}" placeholder="Ф.И.О."><br>
+        <input type="text" name="login" id="login" class="form-control" value="{{ employee.login }}" placeholder="Логин"><br>
+        <input type="text" name="category" id="category" class="form-control" value="{{ employee.category }}" placeholder="Категория (Врач/СМП)"><br>
+        <input type="number" name="work_days" id="work_days" class="form-control" value="{{ employee.work_days }}" placeholder="Отработанные дни"><br>
+        <input type="number" name="wage_rate" id="wage_rate" class="form-control" value="{{ employee.wage_rate }}" placeholder="Ставка"><br>
+        <input type="number" name="score" id="score" class="form-control" value="{{ employee.score }}" placeholder="Балл"><br>
+        <input type="text" name="source" id="source" class="form-control" value="{{ employee.source }}" placeholder="Источник финансирования (ОМС/Бюджет)"><br>
+        <input type="submit" class="btn btn-success" value="Применить">
+    </form>
+    <a href="/employees/{{ employee.id }}/delete" class="btn btn-danger">Удалить работника</a>
+</div>
+{% endblock %}

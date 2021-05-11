@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Список работников
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1>Список работников</h1>
+
+    {% if employees|length > 0 %}
+        {% for employee in employees %}
+        <div class="alert alert-info">
+            <p>Ф.И.О.: {{ employee.name }}</p>
+            <p>Категория работника: {{ employee.category }}</p>
+            <p>Отработанные дни: {{ employee.work_days }}</p>
+            <p>Ставка: {{ employee.wage_rate }}</p>
+            <p>Рейтинг: {{ employee.score }}</p>
+            <p>Источник финансирования: {{ employee.source }}</p>
+            <a href="/employees/{{ employee.id }}/edit" class="btn btn-success">Редактировать</a>
+        </div>
+        {% endfor %}
+    {% else %}
+    <p>Пока здесь пусто</p>
+    {% endif %}
+</div>
+{% endblock %}
