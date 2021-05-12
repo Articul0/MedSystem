@@ -44,6 +44,10 @@ def load_user(user_id):
 
 @app.route('/login', methods=["POST", "GET"])
 def login():
+    try:
+        user = current_user.email
+    except:
+        user = 'гость'
     if request.method == "POST":
         try:
             email = request.form['email']
@@ -57,7 +61,7 @@ def login():
         except:
             return "Ошибка при авторизации"
     else:
-        return render_template("login.html")
+        return render_template("login.html", user=user)
 
 
 @app.route('/')
@@ -66,7 +70,7 @@ def index():
     try:
         user = current_user.email
     except:
-        user = ''
+        user = 'гость'
     return render_template("index.html", user=user)
 
 
@@ -84,7 +88,7 @@ def employees():
     try:
         user = current_user.email
     except:
-        user = ''
+        user = 'гость'
     employees = Employees.query.order_by(Employees.name).all()
     return render_template("employees.html", employees=employees, user=user)
 
@@ -95,7 +99,7 @@ def employee_edit(id):
     try:
         user = current_user.email
     except:
-        user = ''
+        user = 'гость'
     employee = Employees.query.get(id)
     if request.method == "POST":
         employee.name = request.form['name']
@@ -120,15 +124,23 @@ def employee_edit(id):
 @app.route('/employees/<int:id>/delete')
 @login_required
 def employee_delete(id):
+    try:
+        user = current_user.email
+    except:
+        user = 'гость'
     employee = Employees.query.get_or_404(id)
+    #if request.method == "POST":
     try:
         db.session.delete(employee)
         db.session.flush()
         db.session.commit()
-        return render_template("employees.html")
+        employees = Employees.query.order_by(Employees.name).all()
+        return render_template("employees.html", employees=employees, user=user)
     except:
         db.session.rollback()
         return 'Ошибка при удалении'
+    #else:
+        #return render_template("employee_delete.html", employee=employee, user=user)
 
 
 @app.route('/add-employee', methods=['POST', 'GET'])
@@ -137,7 +149,7 @@ def add_employee():
     try:
         user = current_user.email
     except:
-        user = ''
+        user = 'гость'
     if request.method == "POST":
         name = request.form['name']
         category = request.form['category']
@@ -166,7 +178,7 @@ def register():
     try:
         user = current_user.email
     except:
-        user = ''
+        user = 'гость'
     if request.method == "POST":
         email = request.form['email']
         password = generate_password_hash(request.form['password'])
@@ -191,7 +203,7 @@ def data():
     try:
         user = current_user.email
     except:
-        user = ''
+        user = 'гость'
     if request.method == "POST":
         f = request.form['csvfile']
         Employees.query.delete()
