@@ -7,12 +7,21 @@
 {% block body %}
 <div class="container mt-5">
     <p align="right">Вы вошли как: {{ user }}</p>
-    <h1>Зарегестрировать пользователя</h1>
+    <h1>Регистрация</h1>
     <form method="post">
-        <input type="text" name="email" id="email" class="form-control" placeholder="e-mail"><br>
-        <input type="text" name="password" id="password" class="form-control" placeholder="Пароль"><br>
-        <input type="text" name="role" id="role" class="form-control" placeholder="Должность"><br>
-        <input type="submit" class="btn btn-success" value="Зарегистрировать">
+        <input type="text" name="login" id="login" class="form-control" placeholder="Логин"><br>
+        <input type="email" name="email" id="email" class="form-control" placeholder="e-mail"><br>
+        <input type="password" name="password" id="password" class="form-control" placeholder="Пароль"><br>
+        <input type="password" name="password_check" id="password_check" class="form-control" placeholder="Повторите пароль"><br>
+        <input type="text" name="key" id="key" class="form-control" placeholder="Ключ"><br>
+        <select class="form-control" name="role" id="role">
+            <option>Руководитель отделения</option>
+            <option>Сотрудник планового отдела</option>
+            <option>Администратор</option>
+        </select><br>
+        <!--<input type="text" name="role" id="role" class="form-control" placeholder="Должность"><br>-->
+        <input type="submit" class="btn btn-success" value="Зарегистрироваться"><br>
     </form>
 </div>
+
 {% endblock %}

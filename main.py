@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, flash, make_response
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -29,6 +29,7 @@ class Employees(db.Model):
 
 class Heads(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    login = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(500), nullable=False)
     role = db.Column(db.String(10), nullable=False)
@@ -45,19 +46,24 @@ def load_user(user_id):
 @app.route('/login', methods=["POST", "GET"])
 def login():
     try:
-        user = current_user.email
+        user = current_user.login
     except:
         user = 'гость'
+    if not request.cookies.get('authorized'):
+        logout_user()
     if request.method == "POST":
         try:
-            email = request.form['email']
+            login = request.form['login']
             password = request.form['password']
-            user = Heads.query.filter_by(email=email).first()
-            if check_password_hash(user.password, password):
-                login_user(user)
-                return redirect('/')
+            user1 = Heads.query.filter_by(login=login).first()
+            if check_password_hash(user1.password, password):
+                login_user(user1)
+                res = make_response(redirect('/'))
+                res.set_cookie('authorized', 'true', 60*60)
+                return res
             else:
-                return "Неверный пароль"
+                flash('Неверный пароль', category='error')
+                return render_template("login.html", user=user)
         except:
             return "Ошибка при авторизации"
     else:
@@ -68,27 +74,29 @@ def login():
 @app.route('/home')
 def index():
     try:
-        user = current_user.email
+        user = current_user.login
     except:
         user = 'гость'
+    if not request.cookies.get('authorized'):
+        logout_user()
     return render_template("index.html", user=user)
-
 
 @app.route('/about')
 @login_required
 def about():
     logout_user()
     return "Теперь вы не авторизированы"
-    #return render_template("about.html")
 
 
 @app.route('/employees')
 @login_required
 def employees():
     try:
-        user = current_user.email
+        user = current_user.login
     except:
         user = 'гость'
+    if not request.cookies.get('authorized'):
+        logout_user()
     employees = Employees.query.order_by(Employees.name).all()
     return render_template("employees.html", employees=employees, user=user)
 
@@ -97,9 +105,11 @@ def employees():
 @login_required
 def employee_edit(id):
     try:
-        user = current_user.email
+        user = current_user.login
     except:
         user = 'гость'
+    if not request.cookies.get('authorized'):
+        logout_user()
     employee = Employees.query.get(id)
     if request.method == "POST":
         employee.name = request.form['name']
@@ -125,9 +135,11 @@ def employee_edit(id):
 @login_required
 def employee_delete(id):
     try:
-        user = current_user.email
+        user = current_user.login
     except:
         user = 'гость'
+    if not request.cookies.get('authorized'):
+        logout_user()
     employee = Employees.query.get_or_404(id)
     #if request.method == "POST":
     try:
@@ -147,9 +159,11 @@ def employee_delete(id):
 @login_required
 def add_employee():
     try:
-        user = current_user.email
+        user = current_user.login
     except:
         user = 'гость'
+    if not request.cookies.get('authorized'):
+        logout_user()
     if request.method == "POST":
         name = request.form['name']
         category = request.form['category']
@@ -173,26 +187,46 @@ def add_employee():
 
 
 @app.route('/register', methods=["POST", "GET"])
-@login_required
 def register():
     try:
-        user = current_user.email
+        user = current_user.login
     except:
         user = 'гость'
+    if not request.cookies.get('authorized'):
+        logout_user()
     if request.method == "POST":
-        email = request.form['email']
-        password = generate_password_hash(request.form['password'])
-        role = request.form['role']
+        allow_registration = True
+        if Heads.query.filter_by(login=request.form['login']).first():
+            allow_registration = False
+            flash('Пользователь с таким логином уже существует', category='error')
+        if Heads.query.filter_by(email=request.form['email']).first():
+            allow_registration = False
+            flash('Пользователь с такой почтой уже существует', category='error')
+        if request.form['password'] != request.form['password_check']:
+            allow_registration = False
+            flash('Пароли не совпадают', category='error')
 
-        user = Heads(email=email, password=password, role=role)
-        try:
-            db.session.add(user)
-            db.session.flush()
-            db.session.commit()
-            return redirect('/')
-        except:
-            db.session.rollback()
-            return "Ошибка при регистрации"
+        if allow_registration:
+            login = request.form['login']
+            email = request.form['email']
+            password = generate_password_hash(request.form['password'])
+            if request.form['role'] == 'Сотрудник планового отдела':
+                role = 'co-worker'
+            elif request.form['role'] == 'Руководитель отделения':
+                role = 'leader'
+            elif request.form['role'] == 'Администратор':
+                role = 'admin'
+            user = Heads(login=login, email=email, password=password, role=role)
+            try:
+                db.session.add(user)
+                db.session.flush()
+                db.session.commit()
+                return redirect('/login')
+            except:
+                db.session.rollback()
+                return "Ошибка при регистрации"
+        else:
+            return render_template("register.html", user=user)
     else:
         return render_template("register.html", user=user)
 
@@ -201,9 +235,11 @@ def register():
 @login_required
 def data():
     try:
-        user = current_user.email
+        user = current_user.login
     except:
         user = 'гость'
+    if not request.cookies.get('authorized'):
+        logout_user()
     if request.method == "POST":
         f = request.form['csvfile']
         Employees.query.delete()
