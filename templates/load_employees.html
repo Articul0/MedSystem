@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Загрузка данных
+{% endblock %}
+
+{% block body %}
+
+{% if user_role == None %}
+<header class="d-flex justify-content-center py-3">
+    <ul class="nav nav-pills">
+        <li class="nav-item"><a href="/" class="nav-link">Главная</a></li>
+    </ul>
+</header>
+{% elif user_role == "leader" %}
+<header class="d-flex justify-content-center py-3">
+    <ul class="nav nav-pills">
+        <li class="nav-item"><a href="/" class="nav-link">Главная</a></li>
+        <li class="nav-item"><a href="/personal_account" class="nav-link">Личный кабинет</a></li>
+        <li class="nav-item"><a href="/employees" class="nav-link">Список работников</a></li>
+        <li class="nav-item"><a href="/add-employee" class="nav-link">Добавить работника</a></li>
+    </ul>
+</header>
+<div class="container mt-5">
+    <p align="right">Вы вошли как: {{ user }}</p>
+    <h1>Загрузка данных</h1>
+    <form action="data" method="post">
+        <input type="file" name="csvfile" value="">
+        <input type="submit" class="btn btn-success" value="Утвердить">
+    </form>
+</div>
+{% endif %}
+{% endblock %}

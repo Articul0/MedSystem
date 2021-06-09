@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Регистрация
+{% endblock %}
+
+{% block body %}
+<header class="d-flex justify-content-center py-3">
+    <ul class="nav nav-pills">
+        <li class="nav-item"><a href="/" class="nav-link">Главная</a></li>
+    </ul>
+</header>
+{% if user_role == "admin" %}
+<div class="container mt-5">
+    <h1>Личный кабинет</h1>
+    <p>Вы вошли как: {{ user }}</p>
+    <p>Должность: Администратор</p>
+    <form action="data" method="post">
+        Загрузить календарный план: <input type="file" name="csvfile" value="">
+        <input type="submit" class="btn btn-success" value="Утвердить"><br>
+        <input type="date" class="form-control">
+        <input type="submit" class="bottom btn btn-success" value="Сгенирировать ключи">
+    </form>
+    <a href="/employees" class="bottom btn btn-danger">Выйти</a>
+</div>
+{% endif %}
+
+{% endblock %}

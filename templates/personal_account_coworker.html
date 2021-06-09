@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Регистрация
+{% endblock %}
+
+{% block body %}
+<header class="d-flex justify-content-center py-3">
+    <ul class="nav nav-pills">
+        <li class="nav-item"><a href="/" class="nav-link">Главная</a></li>
+    </ul>
+</header>
+{% if user_role == "co-worker" %}
+<div class="container mt-5">
+    <h1>Личный кабинет</h1>
+    <p>Вы вошли как: {{ user }}</p>
+    <p>Должность: Сотрудник планового отдела</p>
+    <form action="data" method="post">
+        <select class="form-control" name="report" id="report">
+            <option>CSV</option>
+            <option>PDF</option>
+        </select><br>
+        <input type="submit" class="btn btn-success" value="Сформировать отчёт">
+    </form>
+    <a href="/employees" class="bottom btn btn-danger">Выйти</a>
+</div>
+{% endif %}
+
+{% endblock %}

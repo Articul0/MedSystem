@@ -38,6 +38,43 @@ class Heads(UserMixin, db.Model):
         return '<heads %r>' % self.id
 
 
+class Keys(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(500), unique=True, nullable=False)
+    admin_id = db.Column(db.Integer, unique=True, nullable=False)
+    employee_id = db.Column(db.Integer, unique=True, nullable=False)
+
+    def __repr__(self):
+        return '<keys %r>' % self.id
+
+
+class Cities(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    city_name = db.Column(db.String(100), unique=True, nullable=False)
+    city_coefficient = db.Column(db.Float, unique=True, nullable=False)
+
+    def __repr__(self):
+        return '<cities %r>' % self.id
+
+
+class Departments(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    department_name = db.Column(db.String(100), unique=True, nullable=False)
+
+    def __repr__(self):
+        return '<departments %r>' % self.id
+
+
+class WorkingHours(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    post = db.Column(db.String(100), unique=True, nullable=False)
+    hours = db.Column(db.Integer, nullable=False)
+    disability = db.Column(db.Integer, nullable=False)
+
+    def __repr__(self):
+        return '<working_hours %r>' % self.id
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return Heads.query.get(int(user_id))
@@ -47,8 +84,10 @@ def load_user(user_id):
 def login():
     try:
         user = current_user.login
+        user_role = Heads.query.filter_by(login=user).first().role
     except:
         user = 'гость'
+        user_role = None
     if not request.cookies.get('authorized'):
         logout_user()
     if request.method == "POST":
@@ -63,11 +102,11 @@ def login():
                 return res
             else:
                 flash('Неверный пароль', category='error')
-                return render_template("login.html", user=user)
+                return render_template("login.html", user=user, user_role=user_role)
         except:
             return "Ошибка при авторизации"
     else:
-        return render_template("login.html", user=user)
+        return render_template("login.html", user=user, user_role=user_role)
 
 
 @app.route('/')
@@ -75,16 +114,39 @@ def login():
 def index():
     try:
         user = current_user.login
+        user_role = Heads.query.filter_by(login=user).first().role
     except:
         user = 'гость'
+        user_role = None
     if not request.cookies.get('authorized'):
         logout_user()
-    return render_template("index.html", user=user)
+    return render_template("index.html", user=user, user_role=user_role)
 
-@app.route('/about')
+
+@app.route('/personal_account')
+@login_required
+def personal_account():
+    try:
+        user = current_user.login
+        user_role = Heads.query.filter_by(login=user).first().role
+    except:
+        user = 'гость'
+        user_role = None
+    if not request.cookies.get('authorized'):
+        logout_user()
+    if Heads.query.filter_by(login=user).first().role == 'admin':
+        return render_template("personal_account_admin.html", user=user, user_role=user_role)
+    elif Heads.query.filter_by(login=user).first().role == 'leader':
+        return render_template("personal_account_leader.html", user=user, user_role=user_role)
+    elif Heads.query.filter_by(login=user).first().role == 'co-worker':
+        return render_template("personal_account_coworker.html", user=user, user_role=user_role)
+
+
+@app.route('/about', methods=['GET', 'POST'])
 @login_required
 def about():
-    logout_user()
+    if request.method == "POST":
+        return "Теперь вы не авторизированы"
     return "Теперь вы не авторизированы"
 
 
@@ -93,12 +155,14 @@ def about():
 def employees():
     try:
         user = current_user.login
+        user_role = Heads.query.filter_by(login=user).first().role
     except:
         user = 'гость'
+        user_role = None
     if not request.cookies.get('authorized'):
         logout_user()
     employees = Employees.query.order_by(Employees.name).all()
-    return render_template("employees.html", employees=employees, user=user)
+    return render_template("employees.html", employees=employees, user=user, user_role=user_role)
 
 
 @app.route('/employees/<int:id>/edit', methods=['POST', 'GET'])
@@ -106,8 +170,10 @@ def employees():
 def employee_edit(id):
     try:
         user = current_user.login
+        user_role = Heads.query.filter_by(login=user).first().role
     except:
         user = 'гость'
+        user_role = None
     if not request.cookies.get('authorized'):
         logout_user()
     employee = Employees.query.get(id)
@@ -128,7 +194,7 @@ def employee_edit(id):
             db.session.rollback()
             return "Ошибка при редактировании работника"
     else:
-        return render_template("employee_edit.html", employee=employee, user=user)
+        return render_template("employee_edit.html", employee=employee, user=user, user_role=user_role)
 
 
 @app.route('/employees/<int:id>/delete')
@@ -136,8 +202,10 @@ def employee_edit(id):
 def employee_delete(id):
     try:
         user = current_user.login
+        user_role = Heads.query.filter_by(login=user).first().role
     except:
         user = 'гость'
+        user_role = None
     if not request.cookies.get('authorized'):
         logout_user()
     employee = Employees.query.get_or_404(id)
@@ -147,7 +215,7 @@ def employee_delete(id):
         db.session.flush()
         db.session.commit()
         employees = Employees.query.order_by(Employees.name).all()
-        return render_template("employees.html", employees=employees, user=user)
+        return render_template("employees.html", employees=employees, user=user, user_role=user_role)
     except:
         db.session.rollback()
         return 'Ошибка при удалении'
@@ -160,8 +228,10 @@ def employee_delete(id):
 def add_employee():
     try:
         user = current_user.login
+        user_role = Heads.query.filter_by(login=user).first().role
     except:
         user = 'гость'
+        user_role = None
     if not request.cookies.get('authorized'):
         logout_user()
     if request.method == "POST":
@@ -183,15 +253,11 @@ def add_employee():
             db.session.rollback()
             return "Ошибка при добавлении работника"
     else:
-        return render_template("add_employee.html", user=user)
+        return render_template("add_employee.html", user=user, user_role=user_role)
 
 
 @app.route('/register', methods=["POST", "GET"])
 def register():
-    try:
-        user = current_user.login
-    except:
-        user = 'гость'
     if not request.cookies.get('authorized'):
         logout_user()
     if request.method == "POST":
@@ -226,18 +292,20 @@ def register():
                 db.session.rollback()
                 return "Ошибка при регистрации"
         else:
-            return render_template("register.html", user=user)
+            return render_template("register.html")
     else:
-        return render_template("register.html", user=user)
+        return render_template("register.html")
 
 
-@app.route('/data', methods=["POST", "GET"])
+@app.route('/load_employees', methods=["POST", "GET"])
 @login_required
-def data():
+def load_employees():
     try:
         user = current_user.login
+        user_role = Heads.query.filter_by(login=user).first().role
     except:
         user = 'гость'
+        user_role = None
     if not request.cookies.get('authorized'):
         logout_user()
     if request.method == "POST":
@@ -264,9 +332,9 @@ def data():
                     db.session.rollback()
                     return "Ошибка при добавлении работника"
         employees = Employees.query.order_by(Employees.name).all()
-        return render_template("employees.html", employees=employees, user=user)
+        return render_template("employees.html", employees=employees, user=user, user_role=user_role)
     else:
-        return render_template("data.html", user=user)
+        return render_template("load_employees.html", user=user, user_role=user_role)
 
 
 if __name__ == "__main__":

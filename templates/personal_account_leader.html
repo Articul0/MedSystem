@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Регистрация
+{% endblock %}
+
+{% block body %}
+
+{% if user_role == "leader" %}
+<header class="d-flex justify-content-center py-3">
+    <ul class="nav nav-pills">
+        <li class="nav-item"><a href="/" class="nav-link">Главная</a></li>
+        <li class="nav-item"><a href="/load_employees" class="nav-link">Загрузка табеля</a></li>
+        <li class="nav-item"><a href="/employees" class="nav-link">Список работников</a></li>
+        <li class="nav-item"><a href="/add-employee" class="nav-link">Добавить работника</a></li>
+    </ul>
+</header>
+<div class="container mt-5">
+    <h1>Личный кабинет</h1>
+    <p>Вы вошли как: {{ user }}</p>
+    <p>Должность: Руководитель отделения</p>
+    <form action="data" method="post">
+        Загрузить показатели труда: <input type="file" name="csvfile" value="">
+        <input type="submit" class="btn btn-success" value="Утвердить">
+    </form>
+    <a href="/employees" class="bottom btn btn-danger">Выйти</a>
+</div>
+{% else %}
+<header class="d-flex justify-content-center py-3">
+    <ul class="nav nav-pills">
+        <li class="nav-item"><a href="/" class="nav-link">Главная</a></li>
+    </ul>
+</header>
+{% endif %}
+
+{% endblock %}

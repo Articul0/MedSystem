@@ -5,6 +5,13 @@
 {% endblock %}
 
 {% block body %}
+{% if user_role == None %}
+<header class="d-flex justify-content-center py-3">
+    <ul class="nav nav-pills">
+        <li class="nav-item"><a href="/" class="nav-link">Главная</a></li>
+    </ul>
+</header>
+{% elif user_role == "leader" %}
 <div class="container mt-5">
     <p align="right">Вы вошли как: {{ user }}</p>
     <h1>Удалить работника {{ employee.name }}</h1>
@@ -14,4 +21,5 @@
         <a href="/employees" class="btn btn-success">Нет</a>
     </div>
 </div>
+{% endif %}
 {% endblock %}
